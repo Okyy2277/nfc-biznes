@@ -7,6 +7,7 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif}.p{max-width:500px;margin:auto;padding:30px 16px}.top{text-align:center;margin-bottom:25px}.logo{width:90px;height:90px;border-radius:50%;background:#222;margin:auto;display:flex;align-items:center;justify-content:center;font-size:35px}.top h1{font-size:25px;margin:15px 0 5px}.top p{color:#999;margin:5px}.open{color:#72d98a;font-size:13px}.btn{display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;background:#181818;border:1px solid #292929;border-radius:14px;padding:16px;margin:10px 0}.btn b{font-size:15px}.btn small{display:block;color:#888;margin-top:3px}.tip{background:#fff;color:#111}.tip small{color:#666}.icon{font-size:23px;width:30px;text-align:center}.sec{margin-top:30px}.sec h2{font-size:17px}.service{display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:13px 0}.service span{color:#888;font-size:12px;display:block;margin-top:3px}.social{display:grid;grid-template-columns:1fr 1fr;gap:10px}.social a{text-align:center;text-decoration:none;color:#fff;background:#181818;border:1px solid #292929;border-radius:14px;padding:18px 5px}footer{text-align:center;color:#555;font-size:10px;margin-top:30px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="p">
@@ -18,11 +19,11 @@
 <p class="open">● Otwarte teraz</p>
 </div>
 
-<a class="btn tip" href="LINK_NAPIWEK">
+<a class="btn tip" href="LINK_NAPIWEK" onclick="trackEvent('tip')">
 <div class="icon">💰</div><div><b>Zostaw napiwek</b><small>Doceń naszą pracę ❤️</small></div>
 </a>
 
-<a class="btn" href="LINK_GOOGLE">
+<a class="btn" href="LINK_GOOGLE" onclick="trackEvent('google')">
 <div class="icon">⭐</div><div><b>Oceń nas w Google</b><small>Twoja opinia bardzo nam pomaga</small></div>
 </a>
 
@@ -76,5 +77,58 @@
 <footer>BARBER HOUSE · Powered by NFC</footer>
 
 </div>
+<script>
+
+const SUPABASE_URL = "https://yedxqwkhsqiodtocajmx.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fP_xAht8Gd7-cUXxaOHA-A_ptVagVbC";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
+</script>
+  <script>
+
+async function trackEvent(eventType, metadata = {}) {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const cardCode = params.get("card") || "DEMO-001";
+
+    try {
+
+        const { data, error } = await supabaseClient.rpc(
+            "track_event",
+            {
+                p_card_code: cardCode,
+                p_event_type: eventType,
+                p_metadata: metadata
+            }
+        );
+
+        if (error) {
+            console.error("Błąd analityki:", error);
+            return;
+        }
+
+        console.log("Zapisano:", eventType);
+
+    } catch (error) {
+
+        console.error("Błąd:", error);
+
+    }
+}
+
+
+// Automatyczny zapis wejścia na stronę
+trackEvent("scan", {
+    page: window.location.pathname,
+    referrer: document.referrer || null
+});
+
+</script>
 </body>
 </html>
